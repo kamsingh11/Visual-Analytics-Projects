@@ -1,0 +1,208 @@
+---
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages("xaringan")
+#install.packages("devtools")
+#devtools::install_github('yihui/xaringan')
+```
+
+class: inverse, center, middle
+
+# Global Plastic Waste
+
+#### Kamlesh Singh, Neha Ayuluri, and Vishnu Vardhan Rao Madamanchi
+###### Original Dataset on tidyTuesday by Thomas_Mock on [Github](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-21)
+###### Link to our [Github](https://github.com/kamsingh11/datascience/tree/master)
+##### ![UNCC](./Images/UNCC.png)
+##### October 28th 2019
+---
+class: inverse, center, middle
+#Why Global Plastic Waste?
+--
+![World's Plastic Problem](./Images/plastic.jpg)
+####Negative Effect on Global Environment including Oceans and wildlife Health 
+
+.footnote[
+[1] [World's Plastic Problem](https://www.weforum.org/agenda/2018/08/the-world-of-plastics-in-numbers)]
+
+---
+class: inverse, center, middle
+#Dataset & TidyTuesday Selection
+#### Original Code and Visualization credit goes to **_Lainey Johnson_**  on [Github](https://github.com/LaineyJ/TidyTuesdays/blob/master/2019-05-21/Global%20Plastic%20Waste.R):
+
+![Lainey J](./Images/Lainey.jpg)
+---
+class: inverse, center, middle
+###### "Coast vs Waste" dataset
+![Coast vs Waste](./Images/coast_waste.png)
+
+###### "mismanaged vs gdp" dataset
+![Mismanaged vs gdp](./Images/mismanaged vs gdp.png)
+
+###### "Waste vs Gdp" dataset
+![Waste vs Gdp](./Images/waste vs gdp.png)
+---
+
+class: inverse, center, middle
+##Review of Lainey Johnson’s #tidytuesday post 
+
+---
+![Lainey's Visualization](./Images/Global_Plastic_Waste_Lainey.jpg)
+
+# <center> Lainey's Visualization </center>
+---
+class: inverse, center, middle
+#SUGGESTED DESIGN
+---
+class: inverse, center, middle
+###Mismanaged Plastic Waste vs Coastal Population (2010)
+![Mismanaged Plastic Waste vs Coastal Population (2010)](./Images/regression.png)
+###Graph is modified to show trend across mismanaged waste in various continents
+##### Reference: [Healy Chapter 6](http://socviz.co/modeling.html)
+
+---
+class: inverse, center, middle
+
+#Mismanaged Plastic Waste vs GDP per capita (2010)
+![Mismanaged Plastic Waste vs GDP per capita](./Images/regression_1.png)
+### The continents which have higher GDP are good at managing plastic waste
+---
+class: inverse, center, middle
+
+###Mismanaged Plastic Waste vs Continent (PPPD)
+![Mismanaged Plastic Waste vs Continent](./Images/Mismanaged Plastic Waste per Capita.png)
+##### Reference: [Wilke Chapter 9](https://serialmentor.com/dataviz/boxplots-violins.html)
+---
+class: inverse, center, middle
+
+###Mismanaged Plastic Waste vs Continent (PPPD)
+![Mismanaged Plastic Waste vs Continent (PPPD)](./Images/Mismanaged_violin.png)
+##### Reference: [Wilke Chapter 9](https://serialmentor.com/dataviz/boxplots-violins.html)
+---
+class: inverse, center, middle
+
+###Mismanaged Plastic Waste vs Continent (PPPD)
+![Mismanaged Plastic Waste per capita_strip chart](./Images/Mismanaged Plastic Waste per capita_strip chart.png)
+##### Reference: [Wilke Chapter 9](https://serialmentor.com/dataviz/boxplots-violins.html)
+---
+class: inverse, center, middle
+
+###Mismanaged Plastic Waste vs Continent (PPPD)
+![Mismanaged Plastic Waste per capita](./Images/Mismanaged Plastic Waste per capita_strip chart_violin.png)
+##### Reference: [Wilke Chapter 9](https://serialmentor.com/dataviz/boxplots-violins.html)
+---
+class: inverse, center, middle
+
+###Mismanaged Plastic Waste vs Continent (PPPD)
+![Mismanaged Plastic Waste per capita](./Images/Mismanaged Plastic Waste per capita_sina.png)
+##### Reference: [Wilke Chapter 9](https://serialmentor.com/dataviz/boxplots-violins.html)
+---
+
+class: inverse, center, middle
+
+###Continent vs Coastal Population Proportion 
+![Coastal Population Proportion Bar Chart](./Images/Coastal Population Proportion_Bar chart.png)
+##### Reference: [Wilke Chapter 9](https://serialmentor.com/dataviz/boxplots-violins.html)
+---
+class: inverse, center, middle
+
+###Continent vs Coastal Population Proportion 
+![Coastal Population Proportion Violin](./Images/Coastal Population Proportion Violin.png)
+##### Reference: [Wilke Chapter 9](https://serialmentor.com/dataviz/boxplots-violins.html)
+---
+class: inverse, center, middle
+
+#Continent vs Coastal Proportion
+![Continent vs Coastal Proportion](./Images/Continent vs Coastal Proportion.png)
+##### Reference: [Wilke Chapter 9](https://serialmentor.com/dataviz/boxplots-violins.html)
+---
+class: inverse, center, middle
+
+#Continent vs Coastal Population Proportion
+![Coastal Population Proportion_violin](./Images/Coastal Population Proportion_violin.png)
+##### Reference: [Wilke Chapter 9](https://serialmentor.com/dataviz/boxplots-violins.html)
+---
+class: inverse, center, middle
+#RECOMMENDED DESIGN
+---
+class: inverse, center, middle
+
+#Plastic Produced in All Years
+![Plastic Produced in All Years](./Images/Plastic Production.png)
+##### Reference: [Wilke Chapter 13](https://serialmentor.com/dataviz/time-series.html)
+---
+class: inverse, center, middle
+
+#Plastic Waste Generation in 2010
+![Plastic Waste Generation in 2010](./Images/Plastic Waste Generation.png)
+---
+
+class: inverse, center, middle
+
+#Plastic Waste produced in 2010
+![Plastic Waste produced in 2010](./Images/Plastic Waste produced in 2010.png)
+##### Reference: [Wilke Chapter 15](https://serialmentor.com/dataviz/geospatial-data.html#choropleth-mapping)
+---
+
+class: inverse, center, middle
+
+#Plastic Waste Generation per person 2010
+![Plastic Waste Generation per person 2010](./Images/Plastic Waste Generation per person 2010.png)
+---
+
+class: inverse, center, middle
+
+###Plastic Waste Generation per person per day 2010
+![Plastic Waste Generation per person per day 2010](./Images/Plastic Waste Generation per person per day 2010.png)
+##### Reference: [Wilke Chapter 15](https://serialmentor.com/dataviz/geospatial-data.html#choropleth-mapping)
+---
+class: inverse, center, middle
+
+###Share of Plastic Waste Inadequately Managed 2010
+![Share of Plastic Waste Inadequately Managed 2010](./Images/Share of Plastic Waste Inadequately Managed 2010.png)
+##### Reference: [Wilke Chapter 15](https://serialmentor.com/dataviz/geospatial-data.html#choropleth-mapping)
+---
+class: inverse, center, middle
+
+###Share of Plastic Waste Inadequately Managed 2010
+![Share of Plastic Waste Inadequately Managed 2010](./Images/Share of Plastic Waste Inadequately Managed 2010.png)
+---
+class: inverse, center, middle
+
+#Storyboard
+![Storyboard](./Images/Flexdashboard.png)
+---
+#Conclusion
+
+--
+
+- Annual production of plastics increased nearly 200-fold to 381 million tonnes in 2015 
+
+--
+
+- High-income countries generate more plastic waste per person
+
+--
+
+- Poor waste management across many middle- and low-income countries
+
+--
+
+- Improvement of waste management systems across the world to reduce plastic pollution
+
+--
+
+- Looking forward to make it interactive using Shiny to focus on country level detail
+
+.footnote[
+[1] [Plastic Pollution](https://ourworldindata.org/plastic-pollution)]
+

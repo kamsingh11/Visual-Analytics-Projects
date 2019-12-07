@@ -1,0 +1,138 @@
+```{r}
+#install.packages("janitor")
+#install.packages("extrafont")
+#install.packages("gridExtra")
+#install.packages("tidyverse")
+library(tidyverse)
+library(janitor)
+library(extrafont)
+library(gridExtra)
+# font_import()
+# loadfonts(device="win")
+
+# Data Cleaning -----------------------------------------------------------
+
+# Read in the data
+coast_vs_waste <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
+mismanaged_vs_gdp <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-mismanaged-plastic-waste-vs-gdp-per-capita.csv")
+waste_vs_gdp <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-plastic-waste-vs-gdp-per-capita.csv")
+continent <- readr::read_csv("https://datahub.io/JohnSnowLabs/country-and-continent-codes-list/r/country-and-continent-codes-list-csv.csv")
+
+# Clean up names
+coast_vs_waste <- clean_names(coast_vs_waste)
+mismanaged_vs_gdp <- mismanaged_vs_gdp %>%
+  set_names(c("entity", "code", "year", "mismg_kg_pp_pd", "gdp_per_capita", "total_population_gapminder"))
+waste_vs_gdp <- waste_vs_gdp %>%
+  set_names(c("entity", "code", "year", "waste_kg_pp_pd", "gdp_per_capita", "total_population_gapminder"))
+continent <- clean_names(continent)
+continent$continent_code <- ifelse(is.na(continent$continent_code), "NA", continent$continent_code)
+
+# Merge dfs
+waste_df <- merge(coast_vs_waste, mismanaged_vs_gdp, by = c("code", "year"))
+waste_df <- merge(waste_df, waste_vs_gdp, by = c("code", "year"))
+waste_df <- merge(waste_df, continent, by.x = "code", by.y = "three_letter_country_code")
+waste_df <- select(waste_df, -c(country_name, two_letter_country_code, country_number))
+
+# Exclude countries with no data
+no_data <- waste_df %>%
+  filter(is.na(mismanaged_plastic_waste_tonnes) & is.na(mismg_kg_pp_pd) & is.na(waste_kg_pp_pd) & year == 2010) %>%
+  select(code, entity)
+
+waste_df <- waste_df %>%
+  filter(!code %in% no_data$code) %>%
+  select(-c(entity.x, entity.y, total_population_gapminder.x, total_population_gapminder.y, gdp_per_capita.x)) %>%
+  rename(gdp_per_capita = gdp_per_capita.y) %>%
+  mutate(coastal_prop = coastal_population / total_population_gapminder)
+waste_df$coastal_prop <- ifelse(waste_df$coastal_prop > 1, 1, waste_df$coastal_prop)
+
+# Filter to only 2010 data
+waste_2010 <- waste_df %>%
+  filter(!is.na(waste_kg_pp_pd) & !is.na(mismanaged_plastic_waste_tonnes) & !is.na(mismg_kg_pp_pd) &
+           !is.na(gdp_per_capita) & !is.na(total_population_gapminder & waste_kg_pp_pd < 1)) %>%
+  select(-year)
+
+
+# Visualization -----------------------------------------------------------
+
+# Proportion of coastal pop vs. mismgd plastic
+# Graph setup
+plt <- waste_2010 %>%
+  ggplot(aes(x = coastal_prop, y = mismg_kg_pp_pd)) +
+  geom_point(alpha = 0.75, aes(size = total_population_gapminder, color = continent_name)) +
+  geom_smooth(method = "lm", se = FALSE, color = "grey20", size = 0.75, linetype = "dotted") +
+  geom_smooth(data = filter(waste_2010, continent_name == "Oceania"), method = "lm",
+              se = FALSE, color = "grey20", size = 0.75, linetype = "dashed")
+
+# Style modifications
+plt <- plt +
+  labs(title = "Does the proportion of residents living on the coast affect a continent's mismanaged waste per capita?",
+       subtitle = "It does not appear that there is an overall trend between mismanaged waste per capita and coastal population proportion (dotted line), but Oceania is the exception (dashed line).
+Not surprisingly, it has the highest median number of residents living on a coast, but it also has the highest median mismanaged waste per capita.",
+       caption = "Size of dot = total population",
+       x = "Coastal Population / Total Population", y = "Mismanaged Waste per Person per Day (kg)") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        plot.subtitle = element_text(size = 10),
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        legend.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_size(guide = "none") +
+  scale_color_brewer(name = "Continent", palette = "Dark2")
+
+
+# Box plot of continent vs. mismanaged waste
+oceania_med <- median(filter(waste_2010, continent_name == "Oceania")$mismg_kg_pp_pd)
+
+# Graph setup
+plt1 <- waste_2010 %>%
+  ggplot(aes(x = continent_name, y = mismg_kg_pp_pd)) +
+  geom_boxplot(aes(fill = continent_name))
+
+# Style modifications
+plt1 <- plt1 +
+  labs(title = "Mismanaged Plastic Waste per Capita",
+       caption = "",
+       x = "Continent", y = "Mismanaged Waste per Person per Day (kg)") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2")
+
+# Adding annotation
+plt1 <- plt1 +
+  geom_hline(yintercept = oceania_med, linetype = "dashed")
+
+
+# Box plot of continent vs. coastal proportion
+oceania_prop_med <- median(filter(waste_2010, continent_name == "Oceania")$coastal_prop)
+
+# Graph setup
+plt2 <- waste_2010 %>%
+  ggplot(aes(x = continent_name, y = coastal_prop)) +
+  geom_boxplot(aes(fill = continent_name))
+
+# Style modifications
+plt2 <- plt2 +
+  labs(title = "Coastal Population Proportion",
+       caption = "Source: https://ourworldindata.org/plastic-pollution",
+       x = "Continent", y = "Coastal Population / Total Population") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2")
+
+# Adding annotation
+plt2 <- plt2 +
+  geom_hline(yintercept = oceania_prop_med, linetype = "dashed")
+
+plot_fin <- grid.arrange(plt, plt1, plt2, layout_matrix = rbind(c(1, 1), c(2, 3)))
+plot(plot_fin)
+ggsave("MismanagedWastePerCap_CoastalPopProp.jpeg", plot_fin, width = 11.5, height = 8, units = "in", dpi = 320)
+```

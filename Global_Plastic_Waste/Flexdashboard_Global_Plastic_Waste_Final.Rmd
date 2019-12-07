@@ -1,0 +1,197 @@
+---
+title: "Global Plastic Waste"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    source_code: embed
+---
+
+```{r setup, include=FALSE}
+#https://github.com/LaineyJ/TidyTuesdays/blob/master/2019-05-21/Global%20Plastic%20Waste.R
+#install.packages("flexdashboard")
+#install.packages("janitor")
+#install.packages("extrafont")
+#install.packages("gridExtra")
+#install.packages("dplyr")
+#install.packages("tidyverse")
+#install.packages("ggplot2")
+#install.packages("gifski")
+#install.packages("png")
+#install.packages("transformr")
+#install.packages("plotly")
+#install.packages("flexdashboard")
+#install.packages("RColorBrewer")
+#install.packages("ggforce")
+#install.packages("gganimate")
+library(janitor)
+library(extrafont)
+library(gridExtra)
+library(tidyverse)
+library(gifski)
+library(png)
+library(transformr)
+library(ggplot2)
+library(gganimate)
+library(flexdashboard)
+library(ggforce)
+library(RColorBrewer)
+library(gridExtra)
+library(plotly)
+library(dplyr)
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Plastic waste produced in 2010
+```{r}
+wasteinyears<-readr::read_csv("./Data/global-plastics-production.csv")
+plasticwaste_2010<-readr::read_csv("./Data/plastic-waste-generation-total.csv")
+plasticfate<-readr::read_csv("./Data/global-plastic-fate.csv")
+#plasticfate
+#glimpse(plasticfate)
+
+plasticwaste_2015<-readr::read_csv("./Data/plastic-waste-by-sector.csv")
+#plasticwaste_2015
+
+plasticpercapita<-readr::read_csv("./Data/plastic-waste-per-capita.csv")
+
+library(plotly)
+# light grey boundaries
+l <- list(color = toRGB("grey"), width = 0.5)
+# specify map projection/options
+g <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+plot_geo(plasticwaste_2010) %>%
+  add_trace(
+    z=~`Plastic waste generation (tonnes, total) (tonnes per year)`, color = ~`Plastic waste generation (tonnes, total) (tonnes per year)` , colors = 'Reds',
+     locations = ~Code, marker = list(line = l)
+  ) %>%
+  colorbar(title = 'Plastic waste in Million Tonnes', ticksuffix = '') %>%
+  layout(
+    title = 'Plastic waste produced in 2010',
+    geo = g
+  )
+```
+Column
+-----------------------------------------------------------------------
+
+### Plastic waste generated per person per day in 2010
+
+```{r boxplot}
+#install.packages("plotly")
+library(plotly)
+# light grey boundaries
+l <- list(color = toRGB("grey"), width = 0.5)
+# specify map projection/options
+g <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+plot_geo(plasticpercapita) %>%
+  add_trace(
+    z=~`Per capita plastic waste (kilograms per person per day)`, color = ~`Per capita plastic waste (kilograms per person per day)` , colors = 'Blues',
+     locations = ~Code, marker = list(line = l)
+  ) %>%
+  colorbar(title = 'Plastic waste in Million Tonnes', ticksuffix = 'kg') %>%
+  layout(
+    title = 'Plastic Waste Generated per person per day in 2010',
+    geo = g
+  )
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+### Plastic waste generated per person per day in Kg's
+
+
+```{r barplot}
+
+plasticfate<-readr::read_csv("./Data/global-plastic-fate.csv")
+#plasticfate
+#glimpse(plasticfate)
+
+plasticwaste_2015<-readr::read_csv("./Data/plastic-waste-by-sector.csv")
+#plasticwaste_2015
+
+plasticpercapita<-readr::read_csv("./Data/plastic-waste-per-capita.csv")
+#plasticpercapita
+#glimpse(plasticpercapita)
+inadequateplastic<-readr::read_csv("./Data/inadequately-managed-plastic.csv")
+#inadequateplastic
+# Read in the data
+coast_vs_waste <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
+mismanaged_vs_gdp <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-mismanaged-plastic-waste-vs-gdp-per-capita.csv")
+waste_vs_gdp <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-plastic-waste-vs-gdp-per-capita.csv")
+continent <- readr::read_csv("https://datahub.io/JohnSnowLabs/country-and-continent-codes-list/r/country-and-continent-codes-list-csv.csv")
+# Clean up names
+coast_vs_waste <- clean_names(coast_vs_waste)
+mismanaged_vs_gdp <- mismanaged_vs_gdp %>%
+  set_names(c("entity", "code", "year", "mismg_kg_pp_pd", "gdp_per_capita", "total_population_gapminder"))
+waste_vs_gdp <- waste_vs_gdp %>%
+  set_names(c("entity", "code", "year", "waste_kg_pp_pd", "gdp_per_capita", "total_population_gapminder"))
+continent <- clean_names(continent)
+continent$continent_code <- ifelse(is.na(continent$continent_code), "NA", continent$continent_code)
+
+# Merge dfs
+waste_df <- merge(coast_vs_waste, mismanaged_vs_gdp, by = c("code", "year"))
+waste_df <- merge(waste_df, waste_vs_gdp, by = c("code", "year"))
+waste_df <- merge(waste_df, continent, by.x = "code", by.y = "three_letter_country_code")
+waste_df <- select(waste_df, -c(country_name, two_letter_country_code, country_number))
+
+# Exclude countries with no data
+no_data <- waste_df %>%
+  filter(is.na(mismanaged_plastic_waste_tonnes) & is.na(mismg_kg_pp_pd) & is.na(waste_kg_pp_pd) & year == 2010) %>%
+  select(code, entity)
+
+waste_df <- waste_df %>%
+  filter(!code %in% no_data$code) %>%
+  select(-c(entity.x, entity.y, total_population_gapminder.x, total_population_gapminder.y, gdp_per_capita.x)) %>%
+  rename(gdp_per_capita = gdp_per_capita.y) %>%
+  mutate(coastal_prop = coastal_population / total_population_gapminder)
+waste_df$coastal_prop <- ifelse(waste_df$coastal_prop > 1, 1, waste_df$coastal_prop)
+
+# Filter to only 2010 data
+waste_2010 <- waste_df %>%
+  filter(!is.na(waste_kg_pp_pd) & !is.na(mismanaged_plastic_waste_tonnes) & !is.na(mismg_kg_pp_pd) &
+           !is.na(gdp_per_capita) & !is.na(total_population_gapminder & waste_kg_pp_pd < 1)) %>%
+  select(-year)
+
+plt_l <- waste_2010 %>%
+  ggplot(aes(x = coastal_population, y = mismanaged_plastic_waste_tonnes)) +
+  geom_point(alpha = 0.75, aes(size = total_population_gapminder, color = continent_name)) +
+  geom_smooth(method = "lm", se = FALSE, color = "grey20", size = 0.75, linetype = "dotted") +
+  geom_smooth(data = filter(waste_2010, continent_name == "Oceania"), method = "lm",
+              se = FALSE, color = "grey20", size = 0.75, linetype = "dashed")+
+  scale_y_log10()+scale_x_log10()
+ggplotly(plt_l)
+
+
+
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Gdp_per_capita vs the Mismanaged plastic waste per person per day
+
+```{r}
+
+plt_gdp <- waste_2010 %>%
+  ggplot(aes(x = gdp_per_capita, y = mismg_kg_pp_pd)) +
+  geom_point(alpha = 0.75, aes(size = total_population_gapminder, color = continent_name)) +
+  # geom_smooth(method = "lm", se = FALSE, color = "grey20", size = 0.75, linetype = "dotted") +
+  # geom_smooth(data = filter(waste_2010, continent_name == "Oceania"), method = "lm",
+  #             se = FALSE, color = "grey20", size = 0.75, linetype = "dashed")+
+  scale_x_log10()
+ggplotly(plt_gdp)
+
+
+```

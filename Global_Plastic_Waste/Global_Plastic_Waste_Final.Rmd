@@ -1,0 +1,618 @@
+---
+title: "Global Plastic Waste"
+output: 
+  html_document
+---
+
+```{r setup, include=FALSE}
+#https://github.com/LaineyJ/TidyTuesdays/blob/master/2019-05-21/Global%20Plastic%20Waste.R
+#install.packages("flexdashboard")
+#install.packages("janitor")
+#install.packages("extrafont")
+#install.packages("gridExtra")
+#install.packages("dplyr")
+#install.packages("tidyverse")
+#install.packages("ggplot2")
+#install.packages("gifski")
+#install.packages("png")
+#install.packages("transformr")
+#install.packages("plotly")
+#install.packages("flexdashboard")
+#install.packages("RColorBrewer")
+#install.packages("ggforce")
+#install.packages("gganimate")
+library(janitor)
+library(extrafont)
+library(gridExtra)
+library(tidyverse)
+library(gifski)
+library(png)
+library(transformr)
+library(ggplot2)
+library(gganimate)
+library(flexdashboard)
+library(ggforce)
+library(RColorBrewer)
+library(gridExtra)
+library(plotly)
+library(dplyr)
+```
+```{r linechart}
+wasteinyears<-readr::read_csv("./Data/global-plastics-production.csv")
+#glimpse(wasteinyears)
+PlasticProductionInallYears<-wasteinyears %>%
+ggplot(aes(x=Year,y=`Global plastics production (million tonnes) (tonnes)`))+
+  geom_line(color='red')+
+  ggtitle("Plastic Production in Million Tonnes")+
+  labs(x = "Year", y = "Global Plastic Production (million tonnes)")+
+  theme_classic()
+```
+```{r}
+### Plastic Produced in all years
+library(plotly)
+ggplotly(PlasticProductionInallYears)
+```
+#install.packages("gifski")
+#install.packages("png)
+#install.packages("transformr")
+#library(gifski)
+#library(png)
+#library(transformr)
+#library(ggplot2)
+#library(gganimate)
+
+Animation of Plastic Production in all years:
+
+```{r animation}
+theme_set(theme_bw())
+
+#glimpse(wasteinyears)
+PlasticProductionInallYears<-wasteinyears %>%
+ggplot(aes(x=Year,y=`Global plastics production (million tonnes) (tonnes)`,group))+
+  geom_line(color='red')+ggtitle("Plastic Production in Million Tonnes across all Years") 
+  PlasticProductionInallYears +
+    geom_point() +
+    transition_reveal(Year) 
+ #PlasticProductionInallYears + transition_time(Year) +
+  #labs(title = "Year: {frame_time}") +
+    # ease_aes("linear")
+```
+```{r boxplot}
+### Plastic waste generation in 2010
+plasticwaste_2010<-readr::read_csv("./Data/plastic-waste-generation-total.csv")
+#glimpse(plasticwaste_2010)
+Plasticwastegeneration2010<-plasticwaste_2010%>%
+  filter(Entity %in% c("United States","Germany","Egypt","China","India"))%>%
+  ggplot(aes(x=reorder(Entity,-`Plastic waste generation (tonnes, total) (tonnes per year)`),y=`Plastic waste generation (tonnes, total) (tonnes per year)`,fill=`Plastic waste generation (tonnes, total) (tonnes per year)`))+
+  geom_bar(position="dodge",stat = "identity")+coord_flip()+ggtitle("Plastic Waste Generation (2010)") +
+   scale_fill_distiller(palette = "Reds", direction = 1) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+   # panel.grid.major.y = element_line(color = "white"),
+    panel.ontop = TRUE
+  ) +
+  labs(x = "Country", y = "Plastic Waste Generated (Tonnes)")
+  
+
+library(plotly)
+ggplotly(Plasticwastegeneration2010)
+```
+```{r chloropleth}
+###chloropleth map of Plastic production in 2010 across different countries.
+#install.packages("plotly")
+library(plotly)
+# light grey boundaries
+l <- list(color = toRGB("grey"), width = 0.5)
+# specify map projection/options
+g <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+plot_geo(plasticwaste_2010) %>%
+  add_trace(
+    z=~`Plastic waste generation (tonnes, total) (tonnes per year)`, color = ~`Plastic waste generation (tonnes, total) (tonnes per year)` , colors = 'Reds',
+     locations = ~Code, marker = list(line = l)
+  ) %>%
+  colorbar(title = 'Plastic waste in Million Tonnes', ticksuffix = '') %>%
+  layout(
+    title = 'Plastic waste produced in 2010',
+    geo = g
+  )
+
+```
+
+```{r animations}
+#Animation of Box plot for the Plastic waste generated in 2010
+plasticwaste_2010<-readr::read_csv("./Data/plastic-waste-generation-total.csv")
+#glimpse(plasticwaste_2010)
+Plasticwastegeneration2010<-plasticwaste_2010%>%
+  filter(Entity %in% c("United States","Germany","Egypt","China","India"))%>%
+  ggplot(aes(x=reorder(Entity,-`Plastic waste generation (tonnes, total) (tonnes per year)`),y=`Plastic waste generation (tonnes, total) (tonnes per year)`,fill=`Plastic waste generation (tonnes, total) (tonnes per year)`))+
+  geom_bar(position="dodge",stat = "identity")+coord_flip()+ggtitle("Plastic waste generation, 2010") +
+   scale_fill_distiller(palette = "Reds", direction = 1) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+   # panel.grid.major.y = element_line(color = "white"),
+    panel.ontop = TRUE
+  ) +
+  labs(x = "Country", y = "Plastic waste generated in Tonnes")
+  
+Plasticwastegeneration2010 + transition_states(`Plastic waste generation (tonnes, total) (tonnes per year)`, wrap = FALSE) +
+  shadow_mark()
+
+```
+Plastic waste generated per person per day in Kg's
+
+```{r barplot}
+
+plasticfate<-readr::read_csv("./Data/global-plastic-fate.csv")
+plasticfate
+#glimpse(plasticfate)
+
+plasticwaste_2015<-readr::read_csv("./Data/plastic-waste-by-sector.csv")
+#plasticwaste_2015
+
+plasticpercapita<-readr::read_csv("./Data/plastic-waste-per-capita.csv")
+#plasticpercapita
+#glimpse(plasticpercapita)
+Plasticwastegenerationperperson2010<-plasticpercapita%>%
+  filter(Entity %in% c("United States","United Kingdom","Brazil","China","Canada"
+                       ,"Benin","India"))%>%
+ggplot(aes(x=reorder(Entity,-`Per capita plastic waste (kilograms per person per day)`),y=`Per capita plastic waste (kilograms per person per day)`,fill=`Per capita plastic waste (kilograms per person per day)`))+
+  geom_bar(position="dodge",stat = "identity")+coord_flip()+ggtitle("Plastic waste generation per person, 2010") +
+scale_fill_distiller(palette = "Reds", direction = 1) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+   # panel.grid.major.y = element_line(color = "white"),
+    panel.ontop = TRUE
+  ) +
+  labs(x = "plastic_waste_per_person_per_day", y = "Country")
+
+Plasticwastegenerationperperson2010
+
+
+library(plotly)
+ggplotly(Plasticwastegenerationperperson2010)
+```
+Animation of Plastic waste generated per person per day in Kg's
+
+```{r}
+
+plasticfate<-readr::read_csv("./Data/global-plastic-fate.csv")
+plasticfate
+#glimpse(plasticfate)
+
+plasticwaste_2015<-readr::read_csv("./Data/plastic-waste-by-sector.csv")
+#plasticwaste_2015
+
+plasticpercapita<-readr::read_csv("./Data/plastic-waste-per-capita.csv")
+#plasticpercapita
+#glimpse(plasticpercapita)
+Plasticwastegenerationperperson2010<-plasticpercapita%>%
+  filter(Entity %in% c("United States","United Kingdom","Brazil","China","Canada"
+                       ,"Benin","India"))%>%
+ggplot(aes(x=reorder(Entity,-`Per capita plastic waste (kilograms per person per day)`),y=`Per capita plastic waste (kilograms per person per day)`,fill=`Per capita plastic waste (kilograms per person per day)`))+
+  geom_bar(position="dodge",stat = "identity")+coord_flip()+ggtitle("Plastic waste generation per person, 2010") +
+scale_fill_distiller(palette = "Reds", direction = 1) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+   # panel.grid.major.y = element_line(color = "white"),
+    panel.ontop = TRUE
+  ) +
+  labs(x = "plastic_waste_per_person_per_day", y = "Country")
+
+Plasticwastegenerationperperson2010 + transition_states(Entity, wrap = FALSE) +
+  shadow_mark()
+
+```
+Chloropleth map of plastic waste generated per person per day in kg
+```{r}
+
+#install.packages("plotly")
+library(plotly)
+# light grey boundaries
+l <- list(color = toRGB("grey"), width = 0.5)
+# specify map projection/options
+g <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+plot_geo(plasticpercapita) %>%
+  add_trace(
+    z=~`Per capita plastic waste (kilograms per person per day)`, color = ~`Per capita plastic waste (kilograms per person per day)` , colors = 'Blues',
+     locations = ~Code, marker = list(line = l)
+  ) %>%
+  colorbar(title = 'Plastic waste in Million Tonnes', ticksuffix = 'kg') %>%
+  layout(
+    title = 'Plastic Waste that is Generated per person per day in 2010',
+    geo = g
+  )
+
+
+
+```
+chloropleth map of mismanaged plastic waste across different countries
+```{r}
+
+inadequateplastic<-readr::read_csv("./Data/inadequately-managed-plastic.csv")
+inadequateplastic
+
+
+#install.packages("plotly")
+library(plotly)
+# light grey boundaries
+l <- list(color = toRGB("grey"), width = 0.5)
+# specify map projection/options
+g <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+plot_geo(inadequateplastic) %>%
+  add_trace(
+    z=~`Share of plastic inadequately managed (%)`, color = ~`Share of plastic inadequately managed (%)` , colors = 'Blues',
+     locations = ~Code, marker = list(line = l)
+  ) %>%
+  colorbar(title = 'Plastic waste in Million Tonnes', ticksuffix = '%') %>%
+  layout(
+    title = 'Share of plastic waste that is inadequately managed, 2010',
+    geo = g
+  )
+
+
+
+```
+```{r}
+
+# Read in the data
+coast_vs_waste <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/coastal-population-vs-mismanaged-plastic.csv")
+mismanaged_vs_gdp <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-mismanaged-plastic-waste-vs-gdp-per-capita.csv")
+waste_vs_gdp <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-21/per-capita-plastic-waste-vs-gdp-per-capita.csv")
+continent <- readr::read_csv("https://datahub.io/JohnSnowLabs/country-and-continent-codes-list/r/country-and-continent-codes-list-csv.csv")
+```
+
+```{r}
+# Clean up names
+coast_vs_waste <- clean_names(coast_vs_waste)
+mismanaged_vs_gdp <- mismanaged_vs_gdp %>%
+  set_names(c("entity", "code", "year", "mismg_kg_pp_pd", "gdp_per_capita", "total_population_gapminder"))
+waste_vs_gdp <- waste_vs_gdp %>%
+  set_names(c("entity", "code", "year", "waste_kg_pp_pd", "gdp_per_capita", "total_population_gapminder"))
+continent <- clean_names(continent)
+continent$continent_code <- ifelse(is.na(continent$continent_code), "NA", continent$continent_code)
+
+# Merge dfs
+waste_df <- merge(coast_vs_waste, mismanaged_vs_gdp, by = c("code", "year"))
+waste_df <- merge(waste_df, waste_vs_gdp, by = c("code", "year"))
+waste_df <- merge(waste_df, continent, by.x = "code", by.y = "three_letter_country_code")
+waste_df <- select(waste_df, -c(country_name, two_letter_country_code, country_number))
+
+# Exclude countries with no data
+no_data <- waste_df %>%
+  filter(is.na(mismanaged_plastic_waste_tonnes) & is.na(mismg_kg_pp_pd) & is.na(waste_kg_pp_pd) & year == 2010) %>%
+  select(code, entity)
+
+waste_df <- waste_df %>%
+  filter(!code %in% no_data$code) %>%
+  select(-c(entity.x, entity.y, total_population_gapminder.x, total_population_gapminder.y, gdp_per_capita.x)) %>%
+  rename(gdp_per_capita = gdp_per_capita.y) %>%
+  mutate(coastal_prop = coastal_population / total_population_gapminder)
+waste_df$coastal_prop <- ifelse(waste_df$coastal_prop > 1, 1, waste_df$coastal_prop)
+
+# Filter to only 2010 data
+waste_2010 <- waste_df %>%
+  filter(!is.na(waste_kg_pp_pd) & !is.na(mismanaged_plastic_waste_tonnes) & !is.na(mismg_kg_pp_pd) &
+           !is.na(gdp_per_capita) & !is.na(total_population_gapminder & waste_kg_pp_pd < 1)) %>%
+  select(-year)
+```
+
+
+```{r}
+plt_l <- waste_2010 %>%
+  ggplot(aes(x = coastal_population, y = mismanaged_plastic_waste_tonnes)) +
+  geom_point(alpha = 0.75, aes(size = total_population_gapminder, color = continent_name)) +
+  geom_smooth(method = "lm", se = FALSE, color = "grey20", size = 0.75, linetype = "dotted") +
+  geom_smooth(data = filter(waste_2010, continent_name == "Oceania"), method = "lm",
+              se = FALSE, color = "grey20", size = 0.75, linetype = "dashed")+
+  scale_y_log10()+scale_x_log10()
+plt_l
+```
+
+
+
+
+```{r}
+plt_gdp <- waste_2010 %>%
+  ggplot(aes(x = gdp_per_capita, y = mismg_kg_pp_pd)) +
+  geom_point(alpha = 0.75, aes(size = total_population_gapminder, color = continent_name)) +
+  # geom_smooth(method = "lm", se = FALSE, color = "grey20", size = 0.75, linetype = "dotted") +
+  # geom_smooth(data = filter(waste_2010, continent_name == "Oceania"), method = "lm",
+  #             se = FALSE, color = "grey20", size = 0.75, linetype = "dashed")+
+  scale_x_log10()
+plt_gdp
+``` 
+
+
+```{r}
+# Chloropleth of gdp_per_capita vs mismanaged plastic waste in tonnes
+#install.packages("plotly")
+library(plotly)
+# light grey boundaries
+l <- list(color = toRGB("grey"), width = 0.5)
+
+# specify map projection/options
+g <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+
+ plot_geo(waste_2010) %>%
+  add_trace(
+    z = ~mismanaged_plastic_waste_tonnes , color = ~mismanaged_plastic_waste_tonnes , colors = 'Blues',
+    text = ~continent_name, locations = ~code, marker = list(line = l)
+  ) %>%
+  colorbar(title = 'Mismanaged Plastic waste in Tonnes', tickprefix = '') %>%
+  layout(
+    title = '2010 Global Wastage',
+    geo = g
+  )
+
+```
+
+```{r}
+# Proportion of coastal pop vs. mismgd plastic
+# Graph setup
+plt <- waste_2010 %>%
+  ggplot(aes(x = coastal_prop, y = mismg_kg_pp_pd)) +
+  geom_point(alpha = 0.75, aes(size = total_population_gapminder, color = continent_name)) +
+  geom_smooth(method = "lm", se = FALSE, color = "grey20", size = 0.75, linetype = "dotted") +
+  geom_smooth(data = filter(waste_2010, continent_name == "Oceania"), method = "lm",
+              se = FALSE, color = "grey20", size = 0.75, linetype = "dashed")
+
+# Style modifications
+plt <- plt +
+  labs(title = "AFFECT OF RESIDENT PROPORTION ON CONTINENT'S MISMANAGED WASTE PER CAPITA",
+       caption = "Size of dot = total population",
+       x = "Coastal Population / Total Population", y = "Mismanaged Waste per Person per Day (kg)") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        plot.subtitle = element_text(size = 10),
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        legend.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_size(guide = "none") +
+  scale_color_brewer(name = "Continent", palette = "Dark2")
+
+#plot(plt)
+```
+
+```{r}
+#install.packages("plotly")
+library(plotly)
+ggplotly(plt)
+```
+
+```{r}
+# Box plot of continent vs. mismanaged waste
+oceania_med <- median(filter(waste_2010, continent_name == "Oceania")$mismg_kg_pp_pd)
+
+# Graph setup
+plt1 <- waste_2010 %>%
+    ggplot(aes(x = reorder(continent_name, mismg_kg_pp_pd, FUN = median),y = mismg_kg_pp_pd)) +
+  geom_boxplot(aes(fill = continent_name))
+plt1
+```
+```{r}
+# Style modifications
+library(RColorBrewer)
+
+plt1 <- plt1 +
+  scale_fill_manual(values = brewer.pal(6, "Dark2"))+
+  labs(title = "Continent vs Mismanaged Plastic Waste (PPPD)",
+       caption = "",
+       x = "Continent", y = "Mismanaged Waste per Person per Day (kg)") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2") +
+   theme_minimal()
+
+# Adding annotation
+plt1 <- plt1 +
+  geom_hline(yintercept = oceania_med, linetype = "dashed")
+#plot(plt1)
+library(plotly)
+ggplotly(plt1)
+```
+```{r}
+#violin
+plt1_violin <- waste_2010 %>%
+  ggplot(aes(x = reorder(continent_name, mismg_kg_pp_pd, FUN = median),y = mismg_kg_pp_pd)) +
+geom_violin(aes(fill = continent_name),trim=FALSE) +
+    labs(title = "Continent vs Mismanaged Plastic Waste (PPPD)",
+       caption = "",
+       x = "Continent", y = "Mismanaged Waste per Person per Day (kg)") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme_minimal()
+plt1_violin
+```
+
+```{r}
+### Strip Chart of continent vs. mismanaged waste
+plt_strip <- waste_2010 %>%
+    ggplot(aes(x = reorder(continent_name, mismg_kg_pp_pd, FUN = median),y = mismg_kg_pp_pd)) +
+  geom_jitter(position=position_jitter(0.2), cex=1.2) +
+  stat_summary(fun.y=mean, geom="point", shape=18,
+                 size=3, color="red")+
+  labs(title = "Continent vs Mismanaged Plastic Waste (PPPD)",
+       caption = "",
+       x = "Continent", y = "Mismanaged Waste per Person per Day (kg)") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme_minimal()
+plt_strip
+```
+
+
+```{r}
+# Strip Chart with Violin
+plt_strip_violin <- waste_2010 %>%
+    ggplot(aes(x = reorder(continent_name, mismg_kg_pp_pd, FUN = median),y = mismg_kg_pp_pd)) +
+  geom_violin(trim = FALSE)+
+  geom_jitter(position=position_jitter(0.2), cex=1.2) +
+  stat_summary(fun.y=mean, geom="point", shape=18,
+                 size=3, color="red")+
+  labs(title = "Continent vs Mismanaged Plastic Waste (PPPD)",
+       caption = "",
+       x = "Continent", y = "Mismanaged Waste per Person per Day (kg)") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme_minimal()
+  #theme_classic() 
+plt_strip_violin
+```
+```{r}
+#sina plot
+#install.packages("ggforce")
+library(tidyverse)
+library(ggforce)
+plt_sina <- waste_2010 %>%
+  ggplot(aes(x = reorder(continent_name, mismg_kg_pp_pd, FUN = median),y = mismg_kg_pp_pd)) +
+  geom_sina(aes(colour = continent_name), size = 1.5) +
+  labs(title = "Continent vs Mismanaged Plastic Waste (PPPD)",
+       x = "Continent", y = "Mismanaged Waste per Person per Day (kg)") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90"))+
+  theme_minimal()
+plt_sina
+```
+
+```{r}
+### Box plot of continent vs. coastal proportion
+# Box plot of continent vs. coastal proportion
+oceania_prop_med <- median(filter(waste_2010, continent_name == "Oceania")$coastal_prop)
+
+# Graph setup
+plt2 <- waste_2010 %>%
+  ggplot(aes(x = reorder(continent_name, coastal_prop, FUN = median),y = coastal_prop)) +
+  geom_boxplot(aes(fill = continent_name))
+
+# Style modifications
+plt2 <- plt2 +
+  labs(title = "Coastal Population Proportion",
+       caption = "Source: https://ourworldindata.org/plastic-pollution",
+       x = "Continent", y = "Coastal Population / Total Population") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme_minimal()
+
+# Adding annotation
+plt2 <- plt2 +
+  geom_hline(yintercept = oceania_prop_med, linetype = "dashed")
+
+#plot_fin <- grid.arrange(plt, plt1, plt2, layout_matrix = rbind(c(1, 1), c(2, 3)))
+#plot(plt2)
+#ggsave("MismanagedWastePerCap_CoastalPopProp.jpeg", plt, width = 11.5, height = 8, units = "in", dpi = 320)
+library(plotly)
+ggplotly(plt2)
+```
+```{r}
+### Strip Chart of continent vs coastal proportion
+plt1_strip <- ggplot(waste_2010, aes(x = reorder(continent_name, coastal_prop, FUN = median),y = coastal_prop)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#999999")) +
+  geom_violin(aes(fill = continent_name),trim=FALSE) +
+  stat_summary(fun.y=mean, geom="point", shape=18,
+                 size=3, color="red")+
+   labs(title = "continent vs coastal proportion",
+       caption = "",
+       x = "Continent", y = "Coastal Proportion") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme_minimal()
+plt1_strip
+```
+
+```{r}
+### Strip Chart of continent vs coastal proportion
+plt1_strip <- ggplot(waste_2010, aes(x = reorder(continent_name, coastal_prop, FUN = median),y = coastal_prop)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#999999")) +
+  geom_jitter(position=position_jitter(0.2), cex=1.2) +
+  stat_summary(fun.y=mean, geom="point", shape=18,
+                 size=3, color="red")+
+   labs(title = "continent vs coastal proportion",
+       caption = "",
+       x = "Continent", y = "Coastal Proportion") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme_minimal()
+plt1_strip
+```
+
+```{r}
+### Strip Chart of continent vs coastal proportion
+# Strip Chart with Violin
+plt1_strip_violin <- ggplot(waste_2010, aes(x = reorder(continent_name, coastal_prop, FUN = median),y = coastal_prop)) +
+  scale_color_manual(values=c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#999999")) +
+  geom_violin(trim = FALSE)+
+  geom_jitter(position=position_jitter(0.2), cex=1.2) +
+  stat_summary(fun.y=mean, geom="point", shape=18,
+                 size=3, color="red")+
+ labs(title = "continent vs coastal proportion",
+       caption = "",
+       x = "Continent", y = "Coastal Proportion") +
+  theme(text = element_text(family = "Franklin Gothic Medium"),
+        plot.title = element_text(family = "Franklin Gothic Heavy"),
+        legend.position = "none",
+        plot.background = element_rect(fill = "whitesmoke"),
+        panel.background = element_rect(fill = "whitesmoke"),
+        panel.grid = element_line(color = "grey90")) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme_minimal()
+plt1_strip_violin
+```
